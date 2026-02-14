@@ -46,6 +46,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             >
               Dashboard
             </NavLink>
+              <NavLink
+              to="/course-registration"
+              className="block px-3 py-2 rounded hover:bg-indigo-600"
+            >
+              Course Registration
+            </NavLink>
+
 
             <NavLink
               to="/my-courses"

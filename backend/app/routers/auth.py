@@ -1,11 +1,11 @@
-from operator import or_
+from sqlalchemy import or_
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user_schema import UserCreate
 from app.schemas.auth_schema import LoginSchema, TokenSchema
-from app.utils.password import hash_password, verify_password
+from app.utils.hashing import hash_password, verify_password
 from app.utils.token import create_access_token
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from fastapi.security import OAuth2PasswordRequestForm
@@ -21,15 +21,22 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already exists")
 
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
+
     new_user = User(
         full_name=user.full_name,
         email=user.email,
+        username=user.username,
         password=hash_password(user.password),
-        role=user.role
+        role="student"
     )
+
     db.add(new_user)
     db.commit()
+
     return {"message": "User registered successfully"}
+
 
 @router.post("/login", response_model=TokenSchema)
 def login(
@@ -37,6 +44,7 @@ def login(
     db: Session = Depends(get_db)
 ):
     # user = db.query(User).filter(User.email == form_data.username).first()
+    # user = db.query(User).filter(or_(    User.email == form_data.username, User.username == form_data.username)).first()
     user = db.query(User).filter(or_(    User.email == form_data.username, User.full_name == form_data.username)).first()
 
     if not user or not verify_password(form_data.password, user.password):

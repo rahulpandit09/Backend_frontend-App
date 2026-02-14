@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth";
+import { jwtDecode } from "jwt-decode";
+
+
+interface TokenPayload {
+  user_id: number;
+  role: string;
+  exp: number;
+}
+
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -13,12 +22,29 @@ const Login: React.FC = () => {
 
     try {
       const response = await loginUser(email, password);
-      localStorage.setItem("token", response.data.access_token);
-      navigate("/dashboard");
+
+      const token = response.data.access_token;
+
+      localStorage.setItem("token", token);
+
+      const decoded: TokenPayload = jwtDecode(token);
+      const role = decoded.role;
+
+      localStorage.setItem("role", role);
+      
+      if (role === "admin") {
+        navigate("/admin");
+      } else if (role === "teacher") {
+        navigate("/teacher");
+      } else if (role === "student") {
+        navigate("/student");
+      }
+
     } catch (error) {
       alert("Invalid Credentials");
     }
   };
+
 
   return (
     <section className="bg-white min-h-screen flex flex-col">

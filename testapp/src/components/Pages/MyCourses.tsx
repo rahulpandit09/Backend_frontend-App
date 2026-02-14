@@ -1,5 +1,5 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";   // ✅ Add this
+import { useNavigate } from "react-router-dom";
 
 interface Course {
   id: number;
@@ -42,9 +42,12 @@ const courses: Course[] = [
 ];
 
 const MyCourses: React.FC = () => {
+  const navigate = useNavigate();
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="relative p-6 bg-gray-100 min-h-screen">
+
+      {/* Courses Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
           <div
@@ -89,6 +92,15 @@ const MyCourses: React.FC = () => {
           </div>
         ))}
       </div>
+      {/* Back Button Bottom Left */}
+      <button
+        onClick={() => navigate(-1)}
+        className="fixed bottom-6 left-6 bg-gray-500 text-white px-5 py-2 rounded-lg shadow-lg hover:bg-gray-600 transition"
+      >
+        ← Back
+      </button>
+
+
     </div>
   );
 };
