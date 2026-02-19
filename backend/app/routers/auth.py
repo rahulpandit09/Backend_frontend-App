@@ -16,8 +16,30 @@ from app.schemas.auth_schema import ForgotPasswordSchema,ResetPasswordSchema
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+# @router.post("/register")
+# def register(user: UserCreate, db: Session = Depends(get_db)):
+#     if db.query(User).filter(User.email == user.email).first():
+#         raise HTTPException(status_code=400, detail="Email already exists")
+
+#     if db.query(User).filter(User.username == user.username).first():
+#         raise HTTPException(status_code=400, detail="Username already exists")
+
+#     new_user = User(
+#         full_name=user.full_name,
+#         email=user.email,
+#         username=user.username,
+#         password=hash_password(user.password),
+#         role="student"
+#     )
+
+#     db.add(new_user)
+#     db.commit()
+
+#     return {"message": "User registered successfully"}
+
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
+
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already exists")
 
@@ -26,16 +48,17 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     new_user = User(
         full_name=user.full_name,
-        email=user.email,
         username=user.username,
+        email=user.email,
         password=hash_password(user.password),
-        role="student"
+        role="student"   # 🔒 Always student
     )
 
     db.add(new_user)
     db.commit()
 
-    return {"message": "User registered successfully"}
+    return {"message": "Student registered successfully"}
+
 
 
 @router.post("/login", response_model=TokenSchema)
@@ -45,7 +68,9 @@ def login(
 ):
     # user = db.query(User).filter(User.email == form_data.username).first()
     # user = db.query(User).filter(or_(    User.email == form_data.username, User.username == form_data.username)).first()
-    user = db.query(User).filter(or_(    User.email == form_data.username, User.full_name == form_data.username)).first()
+    # user = db.query(User).filter(or_(    User.email == form_data.username, User.full_name == form_data.username)).first()
+    user = db.query(User).filter(or_(User.email == form_data.username, User.username == form_data.username)).first()
+
 
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")

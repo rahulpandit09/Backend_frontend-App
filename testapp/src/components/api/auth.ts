@@ -1,12 +1,14 @@
 import axios from "axios";
 
 // 🔹 Create Axios Instance
-// const API = axios.create({
-//   baseURL: "http://127.0.0.1:8000",
-// });
 const API = axios.create({
-  baseURL: "http://192.168.1.4:8000",
+  baseURL: "http://127.0.0.1:8000",
 });
+
+
+// const API = axios.create({
+//   baseURL: "http://192.168.1.4:8000",
+// });
 
 
 // 🔹 Optional: Attach token automatically to every request
@@ -22,14 +24,16 @@ API.interceptors.request.use((config) => {
 // =========================
 // ✅ REGISTER
 // =========================
-export const registerUser = async (data: {
+export const registerUser = (data: {
   full_name: string;
+  username: string;
   email: string;
   password: string;
-  role: string;
 }) => {
   return API.post("/auth/register", data);
 };
+
+
 
 
 // =========================

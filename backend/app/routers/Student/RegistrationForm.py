@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
-from app.models.Student.RegistrationForm import Student
-from app.schemas.Student.RegistrationForm import StudentCreate
-from fastapi import HTTPException
 from typing import List
-from app.schemas.Student.RegistrationForm import StudentResponse
+
+from app.database import SessionLocal
+from app.models.Student.RegistrationForm import RegistrationStudent
+from app.schemas.Student.RegistrationForm import StudentCreate, StudentResponse
+from app.dependencies.auth import get_current_user
 
 
-router = APIRouter(prefix="/students", tags=["Student Registration"])
+router = APIRouter(prefix="/student-registration", tags=["Student Registration"])
+
 
 def get_db():
     db = SessionLocal()
@@ -17,9 +18,30 @@ def get_db():
     finally:
         db.close()
 
+
+# ✅ REGISTER (Only Student Role)
 @router.post("/register")
-def register_student(student: StudentCreate, db: Session = Depends(get_db)):
-    new_student = Student(**student.model_dump())
+def register_student(
+    student: StudentCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    if current_user.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can register")
+
+    # Prevent duplicate registration
+    existing_student = db.query(RegistrationStudent).filter(
+        RegistrationStudent.user_id == current_user.id
+    ).first()
+
+    if existing_student:
+        raise HTTPException(status_code=400, detail="Already registered")
+
+    new_student = RegistrationStudent(
+        **student.model_dump(),
+        user_id=current_user.id
+    )
+
     db.add(new_student)
     db.commit()
     db.refresh(new_student)
@@ -29,17 +51,33 @@ def register_student(student: StudentCreate, db: Session = Depends(get_db)):
         "id": new_student.id
     }
 
-@router.get("/{student_id}", response_model=StudentResponse)
-def get_student_by_id(student_id: int, db: Session = Depends(get_db)):
-    student = db.query(Student).filter(Student.id == student_id).first()
+
+#  STUDENT CAN VIEW ONLY THEIR OWN DATA
+@router.get("/me", response_model=StudentResponse)
+def get_my_student_data(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    student = db.query(RegistrationStudent).filter(
+        RegistrationStudent.user_id == current_user.id
+    ).first()
 
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(status_code=404, detail="Student not registered")
 
     return student
 
 
+#  ADMIN & TEACHER CAN VIEW ALL STUDENTS
+def require_admin_or_teacher(current_user = Depends(get_current_user)):
+    if current_user.role not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return current_user
+
+
 @router.get("/", response_model=List[StudentResponse])
-def get_all_students(db: Session = Depends(get_db)):
-    students = db.query(Student).all()
-    return students
+def get_all_students(
+    db: Session = Depends(get_db),
+    current_user = Depends(require_admin_or_teacher)
+):
+    return db.query(RegistrationStudent).all()

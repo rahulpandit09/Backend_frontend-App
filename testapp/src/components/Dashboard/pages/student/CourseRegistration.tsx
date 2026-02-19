@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface StudentFormData {
     fullName: string;
@@ -22,6 +22,7 @@ interface Errors {
 }
 
 const StudentRegistration: React.FC = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<StudentFormData>({
         fullName: "",
         email: "",
@@ -109,10 +110,14 @@ const StudentRegistration: React.FC = () => {
                 "http://localhost:8000/students/register",
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    },
                     body: JSON.stringify(formData),
                 }
             );
+
 
             const data = await response.json();
 
@@ -129,6 +134,8 @@ const StudentRegistration: React.FC = () => {
             }
 
             alert("Student Registered Successfully 🎉");
+            localStorage.setItem("student", JSON.stringify(formData));
+            navigate("/student-dashboard");
 
             setFormData({
                 fullName: "",
@@ -162,7 +169,7 @@ const StudentRegistration: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-yellow-300 p-6">
-        {/* // <div className="min-h-screen bg-gradient-to-br from-green-400 to-yellow-300 p-4 sm:p-6"> */}
+            {/* // <div className="min-h-screen bg-gradient-to-br from-green-400 to-yellow-300 p-4 sm:p-6"> */}
             <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl p-10">
                 <h1 className="text-3xl font-semibold text-gray-800 mb-2">
                     Student Registration Form

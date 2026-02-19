@@ -1,10 +1,9 @@
-import string
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from app.database import Base
 
-
-class Student(Base):
-    __tablename__ = "students"
+class RegistrationStudent(Base):
+    __tablename__ = "RegistrationStudent"
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -24,3 +23,9 @@ class Student(Base):
 
     parentContact = Column(String, nullable=True)
     agree = Column(Boolean, nullable=False)
+
+  
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    
+    user = relationship("User", back_populates="student")

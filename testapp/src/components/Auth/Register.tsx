@@ -1,16 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../api/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [full_name, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errors, setErrors] = useState({
+    full_name: "",
     username: "",
     email: "",
     password: "",
@@ -19,12 +25,19 @@ const Register: React.FC = () => {
 
   const validateForm = (): boolean => {
     let isValid = true;
+
     const newErrors = {
+      full_name: "",
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
     };
+
+    if (!full_name.trim()) {
+      newErrors.full_name = "Full name is required.";
+      isValid = false;
+    }
 
     if (!username.trim()) {
       newErrors.username = "Username is required.";
@@ -39,8 +52,12 @@ const Register: React.FC = () => {
       isValid = false;
     }
 
-    if (!password) {
-      newErrors.password = "Password is required.";
+    const passwordPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+
+    if (!passwordPattern.test(password)) {
+      newErrors.password =
+        "Password must contain 1 uppercase, 1 lowercase, 1 number and be at least 6 characters.";
       isValid = false;
     }
 
@@ -62,42 +79,55 @@ const Register: React.FC = () => {
 
     try {
       await registerUser({
-        full_name: username,
+        full_name: full_name,
+        username,
         email,
         password,
-        role: "admin",
       });
 
       alert("Registered Successfully 🎉");
       navigate("/login");
-    } catch (error) {
-      alert("Registration failed");
+    } catch (error: any) {
+      alert(error?.response?.data?.detail || "Registration failed");
     }
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Create an Account
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+      <div className="bg-white/20 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/30">
+        <h2 className="text-3xl font-bold text-white text-center mb-6">
+          Create Account
         </h2>
 
         <form onSubmit={handleSubmit} noValidate>
-          
-          {/* Username */}
+
+          {/* Full Name */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Username
-            </label>
             <input
               type="text"
+              placeholder="full_name"
+              value={full_name}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            {errors.full_name && (
+              <p className="text-red-200 text-sm mt-1">
+                {errors.full_name}
+              </p>
+            )}
+          </div>
+
+          {/* Username */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter your username"
+              className="w-full px-4 py-2 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             {errors.username && (
-              <p className="text-red-500 text-sm mt-2">
+              <p className="text-red-200 text-sm mt-1">
                 {errors.username}
               </p>
             )}
@@ -105,80 +135,88 @@ const Register: React.FC = () => {
 
           {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Email
-            </label>
             <input
               type="email"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter your email"
+              className="w-full px-4 py-2 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-2">
+              <p className="text-red-200 text-sm mt-1">
                 {errors.email}
               </p>
             )}
           </div>
 
           {/* Password */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Password
-            </label>
+          <div className="mb-4 relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter your password"
+              className="w-full px-4 py-2 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </span>
             {errors.password && (
-              <p className="text-red-500 text-sm mt-2">
+              <p className="text-red-200 text-sm mt-1">
                 {errors.password}
               </p>
             )}
           </div>
 
           {/* Confirm Password */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Confirm Password
-            </label>
+          <div className="mb-4 relative">
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) =>
                 setConfirmPassword(e.target.value)
               }
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Confirm your password"
+              className="w-full px-4 py-2 rounded-lg bg-white/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+            <span
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+              className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
+            >
+              {showConfirmPassword ? (
+                <EyeOff size={20} />
+              ) : (
+                <Eye size={20} />
+              )}
+            </span>
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-2">
+              <p className="text-red-200 text-sm mt-1">
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
-          {/* Register Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition duration-300"
           >
             Register
           </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-4">
+        <p className="text-center text-white mt-4">
           Already have an account?{" "}
-          <button
+          <span
             onClick={() => navigate("/login")}
-            className="text-blue-500 font-semibold"
+            className="underline cursor-pointer"
           >
-            Sign In
-          </button>
+            Login
+          </span>
         </p>
       </div>
     </div>

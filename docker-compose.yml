@@ -1,16 +1,36 @@
+version: "3.9"
+
 services:
+
+  frontend:
+    build: ./testapp
+    container_name: coaching-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./testapp:/app
+      - /app/node_modules
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
   backend:
-    build: .
+    build: ./backend
     container_name: coaching-backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
     env_file:
-      - .env
+      - ./backend/.env
     depends_on:
       - db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
-    image: postgres:15
+    image: postgres:18
     container_name: coaching-db
     environment:
       POSTGRES_USER: postgres
@@ -20,17 +40,6 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: coaching-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
 
 volumes:
   postgres_data:

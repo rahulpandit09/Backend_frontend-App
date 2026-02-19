@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import column, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -14,3 +15,6 @@ class User(Base):
     role = Column(String(20), nullable=False)  # admin / teacher / student
     reset_token = Column(String, nullable=True)
     reset_token_expiry = Column(DateTime, nullable=True)
+
+    # Relationship
+    student = relationship("RegistrationStudent", back_populates="user", uselist=False)

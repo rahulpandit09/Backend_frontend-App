@@ -38,7 +38,9 @@ const StudentLayout: React.FC = () => {
             Course Registration
           </Link>
 
-
+          <Link to="/student/mycourse" className="block hover:bg-blue-600 p-2 rounded">
+            My Courses
+          </Link>
         </nav>
 
         <button

@@ -19,20 +19,20 @@ const AdminLayout: React.FC = () => {
                     <Link to="/admin" className="block hover:bg-indigo-600 p-2 rounded">
                         Dashboard
                     </Link>
-                    <Link to="/admin/students" className="block hover:bg-indigo-600 p-2 rounded">
-                        Students
+                    <Link to="/admin/AdminManageStudents" className="block hover:bg-indigo-600 p-2 rounded">
+                      Manage Students
                     </Link>
                     <Link to="/admin/teachers" className="block hover:bg-indigo-600 p-2 rounded">
                         Teachers
                     </Link>
                     <Link to="/admin/courses" className="block hover:bg-indigo-600 p-2 rounded">
-                        Courses
+                        Add Courses
                     </Link>
                     <Link to="/admin/courses" className="block hover:bg-indigo-600 p-2 rounded">
                         Batches
                     </Link>
                     <Link to="/admin/fees" className="block hover:bg-indigo-600 p-2 rounded">
-                        Fees
+                        Update Fees
                     </Link>
                     <Link to="/admin/fees" className="block hover:bg-indigo-600 p-2 rounded">
                         Reports

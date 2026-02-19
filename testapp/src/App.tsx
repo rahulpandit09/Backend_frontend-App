@@ -31,6 +31,10 @@ import StudentCourses from "./components/Dashboard/pages/student/StudentCourses"
 import StudentDashboard from "./components/Dashboard/pages/student/StudentDashboard";
 import StudentLayout from "./components/Dashboard/pages/student/StudentLayout";
 import CourseRegistration from "./components/Dashboard/pages/student/CourseRegistration";
+import MyCourses from "./components/Dashboard/pages/student/MyCourses";
+import AdminManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents"
+import AddStudent from "./components/Dashboard/pages/admin/AddStudent";
+import ManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents";
 
 const App = () => {
   return (
@@ -59,6 +63,7 @@ const App = () => {
         <Route path="assignments" element={<StudentAssignments />} />
         <Route path="attendance" element={<StudentAttendance />} />
         <Route path="CourseRegistration" element={<CourseRegistration/>}/>
+        <Route path="mycourse" element={<MyCourses/>}/>
       </Route>
 
       {/* <Route
@@ -117,6 +122,10 @@ const App = () => {
         <Route index element={<AdminDashboard />} />
         <Route path="create-teacher" element={<AdminCreateTeacher />} />
         <Route path="create-student" element={<AdminCreateStudent />} />
+        <Route path="AdminManageStudents" element={<AdminManageStudents/>} />
+        <Route path="/admin/students/add" element={<AddStudent/>} />
+        <Route path="/admin/manage-students" element={<ManageStudents />} />
+
       </Route>
 
       {/* ================= TEACHER ROUTES ================= */}
@@ -143,3 +152,6 @@ const App = () => {
 };
 
 export default App;
+
+
+
