@@ -216,7 +216,7 @@ const Login: React.FC = () => {
       <div className="bg-white/20 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/30">
 
         <h2 className="text-3xl font-bold text-white text-center mb-6">
-          Welcome Back 👋
+          Welcome Back 
         </h2>
 
         <form onSubmit={handleSubmit}>

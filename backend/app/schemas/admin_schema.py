@@ -1,11 +1,14 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 class CreateTeacherSchema(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2)
+    username: str = Field(..., min_length=3)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6)
+
 
 class CreateStudentSchema(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2)
+    username: str = Field(..., min_length=3)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6)

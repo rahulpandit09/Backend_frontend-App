@@ -1,18 +1,15 @@
-version: "3.9"
-
 services:
-
   frontend:
     build: ./testapp
     container_name: coaching-frontend
     ports:
-      - "5173:5173"
+      - "3000:3000"
     volumes:
       - ./testapp:/app
       - /app/node_modules
     stdin_open: true
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       - backend
 
@@ -39,7 +36,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:

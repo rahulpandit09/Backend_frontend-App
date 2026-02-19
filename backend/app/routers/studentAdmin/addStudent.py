@@ -1,62 +1,87 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.core.security import admin_required
+
 from app.database import get_db
 from app.models.admin.addStudent import AdminStudent
 from app.models.admin.fee import Fee
 from app.schemas.admin.addStudent_schema import StudentCreate
-# from app.core.security import admin_required   # enable later
 
-router = APIRouter(prefix="/admin/students", tags=["Admin Students"])
+router = APIRouter(
+    prefix="/admin/students",
+    tags=["Admin Students"]
+)
 
+
+# ============================================================
+# CREATE STUDENT
+# ============================================================
 @router.post("/create")
 def create_student(
     data: StudentCreate,
     db: Session = Depends(get_db),
-    # admin=Depends(admin_required)
 ):
+    """
+    Create a new student and their fee record.
+    This runs inside a single DB transaction for safety.
+    """
 
-    # -----------------------------
+    # ----------------------------------------------------------
     # 1️⃣ Validate Fees
-    # -----------------------------
-    if data.total_fees < 0 or data.paid_amount < 0:
+    # ----------------------------------------------------------
+    total = float(data.total_fees)
+    paid = float(data.paid_amount)
+
+    if total < 0 or paid < 0:
         raise HTTPException(
             status_code=400,
             detail="Fees cannot be negative"
         )
 
-    if data.paid_amount > data.total_fees:
+    # ----------------------------------------------------------
+    # 2️⃣ Prevent Duplicate Email
+    # ----------------------------------------------------------
+    existing_student = db.query(AdminStudent).filter(
+        AdminStudent.email == data.email
+    ).first()
+
+    if existing_student:
         raise HTTPException(
             status_code=400,
-            detail="Paid amount cannot exceed total fees"
+            detail="Email already exists"
         )
 
-    # -----------------------------
-    # 2️⃣ Generate Student Code
-    # -----------------------------
-    last_student = db.query(AdminStudent).order_by(AdminStudent.id.desc()).first()
+    # ----------------------------------------------------------
+    # 3️⃣ Generate Unique Student Code
+    # Example: STU-001, STU-002
+    # ----------------------------------------------------------
+    last_student = db.query(AdminStudent).order_by(
+        AdminStudent.id.desc()
+    ).first()
+
     next_id = 1 if not last_student else last_student.id + 1
     student_code = f"STU-{str(next_id).zfill(3)}"
 
-    # -----------------------------
-    # 3️⃣ Calculate Pending
-    # -----------------------------
-    pending = data.total_fees - data.paid_amount
+    # ----------------------------------------------------------
+    # 4️⃣ Calculate Pending Amount
+    # ----------------------------------------------------------
+    pending = total - paid
 
-    # -----------------------------
-    # 4️⃣ Status Logic (CORRECT)
-    # -----------------------------
-    if data.paid_amount == 0:
+    # ----------------------------------------------------------
+    # 5️⃣ Determine Payment Status
+    # ----------------------------------------------------------
+    if paid == 0:
         status = "Unpaid"
-    elif data.paid_amount == data.total_fees:
+    elif paid < total:
+        status = "Pending"
+    elif abs(paid - total) < 0.01:  # Safe float comparison
         status = "Paid"
     else:
-        status = "Pending"
+        status = "Overpaid"
 
-    # -----------------------------
-    # 5️⃣ Create Student
-    # -----------------------------
+    # ----------------------------------------------------------
+    # 6️⃣ Create Student Record
+    # ----------------------------------------------------------
     new_student = AdminStudent(
         student_id=student_code,
         name=data.name,
@@ -71,23 +96,27 @@ def create_student(
     )
 
     db.add(new_student)
-    db.commit()
-    db.refresh(new_student)
+    db.flush()  # Get student ID before final commit
 
-    # -----------------------------
-    # 6️⃣ Create Fee Record
-    # -----------------------------
+    # ----------------------------------------------------------
+    # 7️⃣ Create Fee Record (Linked to Student)
+    # ----------------------------------------------------------
     new_fee = Fee(
         student_id=new_student.id,
-        total_fees=data.total_fees,
-        paid_amount=data.paid_amount,
+        total_fees=total,
+        paid_amount=paid,
         pending_amount=pending,
         payment_mode=data.payment_mode,
-        notes=data.notes
+        comments=data.comments
     )
 
     db.add(new_fee)
+
+    # ----------------------------------------------------------
+    # 8️⃣ Final Commit (Single Transaction)
+    # ----------------------------------------------------------
     db.commit()
+    db.refresh(new_student)
 
     return {
         "message": "Student created successfully",
@@ -97,61 +126,84 @@ def create_student(
     }
 
 
-
+# ============================================================
+# GET NEXT STUDENT CODE
+# ============================================================
 @router.get("/next-id")
 def get_next_student_id(db: Session = Depends(get_db)):
-    
-    last_student = db.query(AdminStudent).order_by(AdminStudent.id.desc()).first()
-    # admin=Depends(admin_required)
+    """
+    Returns the next student code without creating a student.
+    """
+
+    last_student = db.query(AdminStudent).order_by(
+        AdminStudent.id.desc()
+    ).first()
+
     next_id = 1 if not last_student else last_student.id + 1
     student_code = f"STU-{str(next_id).zfill(3)}"
 
     return {"student_id": student_code}
 
 
-
-# ✅ GET ALL STUDENTS
+# ============================================================
+# GET ALL STUDENTS
+# ============================================================
 @router.get("/")
-def get_all_students(
-    db: Session = Depends(get_db),
-    # admin=Depends(admin_required)
-):
+def get_all_students(db: Session = Depends(get_db)):
+    """
+    Returns all students.
+    """
+
     students = db.query(AdminStudent).all()
     return students
 
 
-# ✅ GET STUDENT BY ID
-
+# ============================================================
+# GET STUDENT BY DATABASE ID
+# ============================================================
 @router.get("/{student_id}")
 def get_student_by_id(
     student_id: int,
     db: Session = Depends(get_db),
-    # admin=Depends(admin_required)
 ):
+    """
+    Get single student by internal database ID.
+    """
+
     student = db.query(AdminStudent).filter(
         AdminStudent.id == student_id
     ).first()
 
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
 
     return student
 
 
-# ✅ GET STUDENT + FEE DETAILS
-
+# ============================================================
+# GET STUDENT + FEE DETAILS
+# ============================================================
 @router.get("/{student_id}/details")
 def get_student_with_fee(
     student_id: int,
     db: Session = Depends(get_db),
-    # admin=Depends(admin_required)
 ):
+    """
+    Get student along with fee details.
+    """
+
     student = db.query(AdminStudent).filter(
         AdminStudent.id == student_id
     ).first()
 
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Student not found"
+        )
 
     fee = db.query(Fee).filter(
         Fee.student_id == student.id

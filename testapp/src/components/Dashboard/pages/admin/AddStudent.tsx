@@ -83,15 +83,25 @@ const AddStudent = () => {
        1️⃣ Auto Pending + Status Logic
     ================================= */
     useEffect(() => {
-        const pending = form.totalFees - form.paidAmount;
+        const total = form.totalFees;
+        const paid = form.paidAmount;
+        const pending = total - paid;
 
         let status = "Unpaid";
-        if (form.paidAmount > 0 && pending > 0) status = "Pending";
-        if (pending === 0 && form.totalFees > 0) status = "Paid";
+
+        if (paid === 0) {
+            status = "Unpaid";
+        } else if (paid < total) {
+            status = "Pending";
+        } else if (paid === total) {
+            status = "Paid";
+        } else {
+            status = "Overpaid";
+        }
 
         setForm((prev) => ({
             ...prev,
-            pending: pending < 0 ? 0 : pending,
+            pending,
             status,
         }));
     }, [form.totalFees, form.paidAmount]);
@@ -143,10 +153,6 @@ const AddStudent = () => {
         if (form.paidAmount < 0) {
             newErrors.paidAmount = "Paid amount cannot be negative";
         }
-        if (form.totalFees > 0 && form.paidAmount > form.totalFees) {
-            newErrors.paidAmount = "Paid cannot exceed total fees";
-        }
-
         // Payment mode only required if something was paid
         if (form.paidAmount > 0 && !form.paymentMode) {
             newErrors.paymentMode = "Select payment mode";
@@ -221,10 +227,27 @@ const AddStudent = () => {
     /* ===============================
        5️⃣ Reusable input class helper
     ================================= */
+    // const inputClass = (field: keyof FormType) =>
+    //     `w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+    //         errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
+    //     }`;
+    // const inputClass = (field: keyof FormType) =>
+    // `w-full border rounded-md p-2 transition
+    //  focus:outline-none focus:border-gray-400
+    //  ${
+    //     errors[field]
+    //         ? "border-red-400 bg-red-50 focus:border-red-500"
+    //         : "border-gray-300 bg-white"
+    //  }`;
     const inputClass = (field: keyof FormType) =>
-        `w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-            errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
+        `w-full border rounded-lg p-2.5 transition duration-200
+     focus:outline-none focus:border-gray-400 focus:shadow-sm
+     ${errors[field]
+            ? "border-red-400 bg-red-50 focus:border-red-500"
+            : "border-gray-300 bg-white"
         }`;
+
+
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
@@ -238,18 +261,21 @@ const AddStudent = () => {
             </div>
 
             {/* <div className="max-w-5xl mx-auto space-y-6"> */}
-            <div className="w-full space-y-6">
+            {/* <div className="w-full space-y-6"> */}
+                <div className="max-w-6xl mx-auto space-y-6">
                 <div className="bg-white rounded-xl shadow-lg">
                     <div className="p-4">
 
                         {studentSections.map((section) => (
-                            <div key={section.id} className="border rounded-lg mb-2">
+                            // <div key={section.id}  className="border rounded-lg mb-2">
+                            <div key={section.id} className="border border-gray-200 rounded-lg mb-4">
 
                                 {/* Section Header */}
                                 <button
                                     type="button"
                                     onClick={() => toggleSection(section.id)}
-                                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-t-lg transition"
+                                    // className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-t-lg transition"
+                                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-t-lg transition"
                                 >
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold text-gray-800">
@@ -269,7 +295,8 @@ const AddStudent = () => {
 
                                 {/* Section Body */}
                                 {expandedSections[section.id] && (
-                                    <div className="p-4 bg-white border-t">
+                                    // <div className="p-4 bg-white border-t">
+                                    <div className="p-4 bg-white border-t border-gray-200">
 
                                         {/* ========================= */}
                                         {/* 1️⃣ BASIC INFO SECTION    */}
@@ -526,13 +553,15 @@ const AddStudent = () => {
                                                             type="text"
                                                             value={form.status}
                                                             readOnly
-                                                            className={`w-full border rounded-md p-2 cursor-not-allowed font-medium ${
-                                                                form.status === "Paid"
+                                                            className={`w-full border rounded-md p-2 cursor-not-allowed font-medium ${form.status === "Paid"
                                                                     ? "bg-green-50 border-green-300 text-green-700"
                                                                     : form.status === "Pending"
-                                                                    ? "bg-yellow-50 border-yellow-300 text-yellow-700"
-                                                                    : "bg-gray-100 border-gray-300 text-gray-500"
-                                                            }`}
+                                                                        ? "bg-yellow-50 border-yellow-300 text-yellow-700"
+                                                                        : form.status === "Overpaid"
+                                                                            ? "bg-purple-50 border-purple-300 text-purple-700"
+                                                                            : "bg-gray-100 border-gray-300 text-gray-500"
+                                                                }`}
+
                                                         />
                                                     </div>
 
@@ -550,7 +579,8 @@ const AddStudent = () => {
                                                         }
                                                         rows={3}
                                                         placeholder="Any additional Comments..."
-                                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                                        // className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                                        className="w-full border border-gray-300 rounded-md p-2 transition focus:outline-none focus:border-gray-400"
                                                     />
                                                 </div>
 
@@ -565,7 +595,8 @@ const AddStudent = () => {
                     </div>
 
                     {/* Action Bar */}
-                    <div className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-xl">
+                    {/* <div className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-xl"> */}
+                    <div className="flex justify-end gap-3 p-3 border-t border-gray-200 bg-gray-50 rounded-b-xl">
                         <button
                             type="button"
                             onClick={() => navigate("/admin/manage-students")}
