@@ -8,7 +8,6 @@ interface Student {
     email: string;
     address?: string;
     gender?: string;
-    dob?: string;
     course: string;
     batch: string;
     admissionDate: string;
@@ -33,7 +32,6 @@ const AddStudent = () => {
         email: "",
         address: "",
         gender: "",
-        dob: "",
         course: "",
         batch: "",
         admissionDate: "",
@@ -194,7 +192,6 @@ const AddStudent = () => {
                     name: form.name.trim(),
                     phone: form.phone.trim(),
                     email: form.email?.trim() || "",
-                    dob: form.dob || null,
                     address: form.address?.trim() || "",
                     course: form.course,
                     batch: form.batch,
@@ -202,7 +199,7 @@ const AddStudent = () => {
                     total_fees: form.totalFees,
                     paid_amount: form.paidAmount,
                     payment_mode: form.paymentMode || null,
-                    notes: form.notes?.trim() || "",
+                    comments: form.notes?.trim() || "",
                 }),
             });
 

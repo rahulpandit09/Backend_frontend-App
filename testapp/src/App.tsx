@@ -35,6 +35,7 @@ import MyCourses from "./components/Dashboard/pages/student/MyCourses";
 import AdminManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents"
 import AddStudent from "./components/Dashboard/pages/admin/AddStudent";
 import ManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents";
+import ViewStudent from "./components/Dashboard/pages/admin/viewStudent";
 
 const App = () => {
   return (
@@ -65,51 +66,7 @@ const App = () => {
         <Route path="CourseRegistration" element={<CourseRegistration/>}/>
         <Route path="mycourse" element={<MyCourses/>}/>
       </Route>
-
-      {/* <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/my-courses"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <Layout>
-              <MyCourses />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/course-registration"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <Layout>
-              <CourseRegistration />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/attendance"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <Layout>
-              <Attendance />
-            </Layout>
-          </ProtectedRoute>
-        }
-      /> */}
-
+      
       {/* ================= ADMIN ROUTES ================= */}
       <Route
         path="/admin"
@@ -125,6 +82,7 @@ const App = () => {
         <Route path="AdminManageStudents" element={<AdminManageStudents/>} />
         <Route path="/admin/students/add" element={<AddStudent/>} />
         <Route path="/admin/manage-students" element={<ManageStudents />} />
+        <Route path="/admin/students/view/:id" element={<ViewStudent />} />
 
       </Route>
 

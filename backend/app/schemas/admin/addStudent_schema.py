@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from datetime import date
 
+
 class StudentCreate(BaseModel):
     name: str
     phone: str
     email: str | None = None
-    dob: date | None = None
     address: str | None = None
     course: str
     batch: str
