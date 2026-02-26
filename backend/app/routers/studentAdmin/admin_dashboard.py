@@ -9,9 +9,8 @@ from datetime import datetime, timedelta
 router = APIRouter(prefix="/admin/dashboard", tags=["Admin Dashboard"])
 
 
-# ===========================
 # SUMMARY API (FULL VERSION)
-# ===========================
+
 
 @router.get("/summary")
 def get_dashboard_summary(db: Session = Depends(get_db)):

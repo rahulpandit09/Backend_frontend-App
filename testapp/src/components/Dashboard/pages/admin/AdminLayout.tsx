@@ -1,79 +1,16 @@
-// import React from "react";
-// import { Link, Outlet, useNavigate } from "react-router-dom";
-
-// const AdminLayout: React.FC = () => {
-//     const navigate = useNavigate();
-
-//     const logout = () => {
-//         localStorage.removeItem("token");
-//         localStorage.removeItem("role");
-//         navigate("/login");
-//     };
-
-//     return (
-//         <div className="flex min-h-screen bg-gray-100">
-//             <aside className="w-64 bg-indigo-700 text-white flex flex-col p-5">
-//                 <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
-
-//                 <nav className="space-y-4 flex-1">
-//                     <Link to="/admin" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Dashboard
-//                     </Link>
-//                     <Link to="/admin/AdminManageStudents" className="block hover:bg-indigo-600 p-2 rounded">
-//                       Manage Students
-//                     </Link>
-//                     <Link to="/admin/teachers" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Teachers
-//                     </Link>
-//                     <Link to="/admin/courses" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Add Courses
-//                     </Link>
-//                     <Link to="/admin/courses" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Batches
-//                     </Link>
-//                     <Link to="/admin/fees" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Update Fees
-//                     </Link>
-//                     <Link to="/admin/fees" className="block hover:bg-indigo-600 p-2 rounded">
-//                         Reports
-//                     </Link>
-
-//                     <Link
-//                         to="/admin/create-teacher"
-//                         className="block hover:bg-indigo-600 p-2 rounded"
-//                     >
-//                        + Add Teacher
-//                     </Link>
-
-//                     <Link
-//                         to="/admin/create-student"
-//                         className="block hover:bg-indigo-600 p-2 rounded"
-//                     >
-//                         + Add Student
-//                     </Link>
-
-
-//                 </nav>
-
-//                 <button
-//                     onClick={logout}
-//                     className="mt-6 bg-red-500 hover:bg-red-600 p-2 rounded"
-//                 >
-//                     Logout
-//                 </button>
-//             </aside>
-
-//             <main className="flex-1 p-6">
-//                 <Outlet />
-//             </main>
-//         </div>
-//     );
-// };
-
-// export default AdminLayout;
-
 import React from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  UserPlus,
+  GraduationCap,
+  BookOpen,
+  Layers,
+  CreditCard,
+  BarChart3,
+  LogOut,
+} from "lucide-react";
 
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -84,79 +21,119 @@ const AdminLayout: React.FC = () => {
     navigate("/login");
   };
 
+  const linkClass =
+    "flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-600 transition-all";
+
+  const activeClass = "bg-indigo-800";
+
   return (
     <div className="h-screen flex bg-gray-100 overflow-hidden">
       
       {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-indigo-700 text-white flex flex-col p-5 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-8">Admin Panel</h2>
+      <aside className="w-64 bg-indigo-700 text-white flex flex-col p-5 shadow-lg">
+        <h2 className="text-2xl font-bold mb-8"> Admin Panel</h2>
 
-        <nav className="space-y-3 flex-1">
-          <Link to="/admin" className="block hover:bg-indigo-600 p-2 rounded">
+        <nav className="space-y-2 flex-1 overflow-hidden">
+
+          <NavLink
+            to="/admin"
+            end
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
+          >
+            <LayoutDashboard size={18} />
             Dashboard
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/AdminManageStudents"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
+            <Users size={18} />
             Manage Students
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/teachers"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
+            <GraduationCap size={18} />
             Teachers
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/courses"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
-            Add Courses
-          </Link>
+            <BookOpen size={18} />
+            Courses
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/batches"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
+            <Layers size={18} />
             Batches
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/fees"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
+            <CreditCard size={18} />
             Update Fees
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/reports"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
+            <BarChart3 size={18} />
             Reports
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/create-teacher"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
-            + Add Teacher
-          </Link>
+            <UserPlus size={18} />
+            Add Teacher
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/admin/create-student"
-            className="block hover:bg-indigo-600 p-2 rounded"
+            className={({ isActive }) =>
+              `${linkClass} ${isActive ? activeClass : ""}`
+            }
           >
-            + Add Student
-          </Link>
+            <UserPlus size={18} />
+            Add Student
+          </NavLink>
+
         </nav>
 
+        {/* Logout */}
         <button
           onClick={logout}
-          className="mt-6 bg-red-500 hover:bg-red-600 p-2 rounded"
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 p-3 rounded-lg mt-4 transition-all"
         >
+          <LogOut size={18} />
           Logout
         </button>
       </aside>

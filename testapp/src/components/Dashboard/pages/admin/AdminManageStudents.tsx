@@ -50,7 +50,7 @@ const ManageStudents = () => {
   };
 
   return (
-    // ❌ Removed min-h-screen
+    // Removed min-h-screen
     <div className="h-full flex flex-col">
 
       {/* Header */}

@@ -107,7 +107,7 @@ const StudentRegistration: React.FC = () => {
             setLoading(true);
 
             const response = await fetch(
-                "http://localhost:8000/students/register",
+                "http://localhost:8000/student-registration/register",
                 {
                     method: "POST",
                     headers: {
