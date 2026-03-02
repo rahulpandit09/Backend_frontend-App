@@ -9,6 +9,7 @@ from app.routers.EVLoogBooks import mfm_log
 from app.routers.Student import RegistrationForm
 from app.routers.studentAdmin import addStudent
 from app.routers.studentAdmin import admin_dashboard
+from app.routers.studentAdmin import adminDashboard_router
 
 # ✅ Import ALL models so SQLAlchemy registers them
 from app.models import user, course as course_model, lecture, enrollment, test, result
@@ -57,6 +58,8 @@ app.include_router(admin.router)
 app.include_router(addStudent.router)
 app.include_router(admin_dashboard.router)
 app.include_router(admin_notification.router)
+# app.include_router(adminDashboard_router.router, prefix="/adminDashboard_router", tags=["adminDashboard_router"])
+app.include_router(adminDashboard_router.router)
 
 # =========================
 # Root Endpoint

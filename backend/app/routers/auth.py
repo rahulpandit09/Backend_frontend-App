@@ -13,6 +13,7 @@ from app.core.security import get_current_user
 from datetime import datetime, timedelta
 import secrets
 from app.schemas.auth_schema import ForgotPasswordSchema,ResetPasswordSchema
+from datetime import datetime
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -74,6 +75,9 @@ def login(
 
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    user.last_login = datetime.now()
+    db.commit()
 
     token = create_access_token(
         {"user_id": user.id, "role": user.role},

@@ -1,10 +1,16 @@
 import axios from "axios";
 
 // 🔹 Create Axios Instance
+//nuse only docker when you want to run docker 
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
 
+
+//this is only for kubernites use when you need k8s
+// const API = axios.create({
+//   baseURL: "/api",
+// });
 
 // const API = axios.create({
 //   baseURL: "http://192.168.1.4:8000",
