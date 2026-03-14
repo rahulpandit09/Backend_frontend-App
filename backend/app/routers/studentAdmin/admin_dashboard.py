@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import get_db
-from app.models.admin.Student import Student
+from app.models.admin.student import Student
 from app.models.admin.payment import Payment
 from datetime import datetime, timedelta
 

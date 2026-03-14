@@ -6,6 +6,10 @@ const API = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
 
+//production leve
+// const API = axios.create({
+//   baseURL: "/api",
+// });
 
 //this is only for kubernites use when you need k8s
 // const API = axios.create({

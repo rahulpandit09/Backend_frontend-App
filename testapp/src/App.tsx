@@ -15,6 +15,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Admin
 import AdminLayout from "./components/Dashboard/pages/admin/AdminLayout";
 import AdminDashboard from "./components/Dashboard/pages/admin/AdminDashboard";
+import Teachers from "./components/Dashboard/pages/admin/Teachers/teacherDash";
+import TeacherProfile from "./components/Dashboard/pages/admin/Teachers/TeacherProfile";
+import AssignTeacher from "./components/Dashboard/pages/admin/Teachers/AssignTeacher";
+
 
 // Teacher
 import TeacherLayout from "./components/Dashboard/pages/teacher/TeacherLayout";
@@ -83,7 +87,9 @@ const App = () => {
         <Route path="/admin/students/add" element={<AddStudent/>} />
         <Route path="/admin/manage-students" element={<ManageStudents />} />
         <Route path="/admin/students/view/:id" element={<ViewStudent />} />
-
+        <Route path="teachers" element={<Teachers />} />
+        <Route path="teachers/assign" element={<AssignTeacher />} />
+        <Route path="teachers/:id" element={<TeacherProfile />} />
       </Route>
 
       {/* ================= TEACHER ROUTES ================= */}

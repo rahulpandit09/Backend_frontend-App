@@ -3,7 +3,7 @@ services:
     build: ./testapp
     container_name: coaching-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./testapp:/app
       - frontend_node_modules:/app/node_modules
