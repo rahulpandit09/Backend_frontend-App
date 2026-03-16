@@ -40,6 +40,8 @@ import AdminManageStudents from "./components/Dashboard/pages/admin/AdminManageS
 import AddStudent from "./components/Dashboard/pages/admin/AddStudent";
 import ManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents";
 import ViewStudent from "./components/Dashboard/pages/admin/viewStudent";
+import Courses from "./components/Dashboard/pages/admin/Courses/Courses";
+
 
 const App = () => {
   return (
@@ -90,6 +92,7 @@ const App = () => {
         <Route path="teachers" element={<Teachers />} />
         <Route path="teachers/assign" element={<AssignTeacher />} />
         <Route path="teachers/:id" element={<TeacherProfile />} />
+        <Route path="courses" element={<Courses/>} />
       </Route>
 
       {/* ================= TEACHER ROUTES ================= */}

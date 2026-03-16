@@ -54,6 +54,7 @@ def assign_teacher(data: FacultyAssignSchema, db: Session = Depends(get_db)):
         data.batch_id
     )
 
+# All Teacher List
 @router.get("/faculty-teachers-list")
 def get_teachers_list(db: Session = Depends(get_db)):
     return db.query(FacultyTeacher).all()
