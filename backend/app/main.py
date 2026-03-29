@@ -19,6 +19,8 @@ from app.models.admin.addStudent import AdminStudent
 from app.models.admin.fee import Fee
 from app.routers.studentAdmin import admin_notification
 from app.routers.Teacher import faculty_router
+from app.routers.Courses.course import router as course_router
+
 
 
 # app = FastAPI(title="Coaching Portal API")
@@ -72,12 +74,15 @@ app.include_router(admin_dashboard.router)
 app.include_router(admin_notification.router)
 app.include_router(adminDashboard_router.router)
 app.include_router(faculty_router.router)
+app.include_router(course_router)  
+
 
 
 # Root Endpoint
 @app.get("/")
 def root():
     return {"message": "Coaching Portal Backend Running"}
+
 
 @app.get("/health")
 def health_check():

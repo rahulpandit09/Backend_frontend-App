@@ -1,4 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
+import {
+  getCourses,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  updateCourseStatus
+} from "../../../../api/courseApi";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,87 +33,12 @@ interface Course {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SUBJECTS    = ["Physics", "Chemistry", "Mathematics", "Biology", "English", "Computer Science"];
+const SUBJECTS = ["Physics", "Chemistry", "Mathematics", "Biology", "English", "Computer Science"];
 const ALL_BATCHES = ["Batch A", "Batch B", "Batch C", "Batch D"];
-const DAYS        = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const TEACHERS    = ["Rahul Sharma", "Priya Singh", "Amit Verma", "Sunita Mehra"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const TEACHERS = ["Rahul Sharma", "Priya Singh", "Amit Verma", "Sunita Mehra"];
 
 // ─── Hardcoded Mock Data ──────────────────────────────────────────────────────
-
-const MOCK_COURSES: Course[] = [
-  {
-    id: 1, course_id: "CRS-001", name: "Physics Foundation", subject: "Physics",
-    teacher_name: "Rahul Sharma", batches: ["Batch A", "Batch B"],
-    students: 65, max_students: 70, status: "Active", fee_type: "Monthly",
-    fee_amount: 1500, discount: 0, fee_due_day: 5,
-    start_date: "2024-01-10", end_date: "2024-06-10",
-    class_days: ["Mon", "Wed", "Fri"], class_time: "10:00",
-    description: "Core physics for board & competitive exams. Covers mechanics, optics, waves and electricity.",
-  },
-  {
-    id: 2, course_id: "CRS-002", name: "Chemistry Basics", subject: "Chemistry",
-    teacher_name: "Priya Singh", batches: ["Batch D"],
-    students: 18, max_students: 40, status: "Active", fee_type: "Monthly",
-    fee_amount: 1400, discount: 5, fee_due_day: 5,
-    start_date: "2024-02-01", end_date: "2024-07-01",
-    class_days: ["Tue", "Thu"], class_time: "11:00",
-    description: "Introduction to organic and inorganic chemistry with practical problem-solving focus.",
-  },
-  {
-    id: 3, course_id: "CRS-003", name: "Advanced Maths", subject: "Mathematics",
-    teacher_name: "Priya Singh", batches: ["Batch C"],
-    students: 52, max_students: 60, status: "Active", fee_type: "Monthly",
-    fee_amount: 1600, discount: 0, fee_due_day: 10,
-    start_date: "2024-01-15", end_date: "2024-06-15",
-    class_days: ["Mon", "Wed", "Fri"], class_time: "09:00",
-    description: "Calculus, algebra and trigonometry for JEE and board exam preparation.",
-  },
-  {
-    id: 4, course_id: "CRS-004", name: "Biology Intro", subject: "Biology",
-    teacher_name: "Amit Verma", batches: ["Batch B", "Batch C"],
-    students: 44, max_students: 50, status: "Active", fee_type: "Monthly",
-    fee_amount: 1300, discount: 10, fee_due_day: 5,
-    start_date: "2024-03-01", end_date: "2024-08-01",
-    class_days: ["Tue", "Thu", "Sat"], class_time: "14:00",
-    description: "Cell biology, genetics and ecology basics for NEET aspirants.",
-  },
-  {
-    id: 5, course_id: "CRS-005", name: "English Grammar", subject: "English",
-    teacher_name: "Sunita Mehra", batches: ["Batch A", "Batch D"],
-    students: 28, max_students: 45, status: "Active", fee_type: "Monthly",
-    fee_amount: 900, discount: 0, fee_due_day: 5,
-    start_date: "2024-01-20", end_date: "2024-05-20",
-    class_days: ["Mon", "Wed"], class_time: "16:00",
-    description: "Grammar, comprehension and writing skills for board and competitive tests.",
-  },
-  {
-    id: 6, course_id: "CRS-006", name: "Organic Chemistry", subject: "Chemistry",
-    teacher_name: "Priya Singh", batches: ["Batch B"],
-    students: 19, max_students: 35, status: "Inactive", fee_type: "Full Course",
-    fee_amount: 8000, discount: 0, fee_due_day: 1,
-    start_date: "2024-04-01", end_date: "2024-09-01",
-    class_days: ["Mon", "Fri"], class_time: "10:00",
-    description: "Advanced organic chemistry reactions and mechanisms for JEE Advanced.",
-  },
-  {
-    id: 7, course_id: "CRS-007", name: "Calculus I", subject: "Mathematics",
-    teacher_name: "Amit Verma", batches: ["Batch D"],
-    students: 38, max_students: 50, status: "Active", fee_type: "Monthly",
-    fee_amount: 1550, discount: 0, fee_due_day: 5,
-    start_date: "2024-02-10", end_date: "2024-07-10",
-    class_days: ["Tue", "Thu", "Sat"], class_time: "11:00",
-    description: "Limits, derivatives and integrals with conceptual depth.",
-  },
-  {
-    id: 8, course_id: "CRS-008", name: "Thermodynamics", subject: "Physics",
-    teacher_name: "Rahul Sharma", batches: ["Batch C"],
-    students: 21, max_students: 40, status: "Active", fee_type: "Monthly",
-    fee_amount: 1500, discount: 0, fee_due_day: 5,
-    start_date: "2024-03-15", end_date: "2024-08-15",
-    class_days: ["Mon", "Wed", "Fri"], class_time: "08:00",
-    description: "Laws of thermodynamics, heat engines and entropy for JEE preparation.",
-  },
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -117,8 +50,6 @@ const weeksBetween = (start: string, end: string) =>
     (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24 * 7)
   );
 
-const nextId = (courses: Course[]) =>
-  courses.length > 0 ? Math.max(...courses.map((c) => c.id)) + 1 : 1;
 
 // ─── Empty Form ───────────────────────────────────────────────────────────────
 
@@ -144,7 +75,7 @@ const EMPTY_FORM = {
 
 const StatCard = ({ title, value }: { title: string; value: any }) => {
   const getColor = () => {
-    if (title.includes("Active"))   return "bg-gradient-to-r from-green-500 to-green-600";
+    if (title.includes("Active")) return "bg-gradient-to-r from-green-500 to-green-600";
     if (title.includes("Subjects")) return "bg-gradient-to-r from-purple-500 to-purple-600";
     if (title.includes("Enrolled")) return "bg-gradient-to-r from-orange-400 to-orange-500";
     return "bg-gradient-to-r from-blue-500 to-blue-600";
@@ -161,11 +92,11 @@ const StatCard = ({ title, value }: { title: string; value: any }) => {
 
 const SubjectBadge = ({ subject }: { subject: string }) => {
   const colors: Record<string, string> = {
-    Physics:            "bg-blue-100 text-blue-700",
-    Chemistry:          "bg-purple-100 text-purple-700",
-    Mathematics:        "bg-green-100 text-green-700",
-    Biology:            "bg-orange-100 text-orange-700",
-    English:            "bg-rose-100 text-rose-700",
+    Physics: "bg-blue-100 text-blue-700",
+    Chemistry: "bg-purple-100 text-purple-700",
+    Mathematics: "bg-green-100 text-green-700",
+    Biology: "bg-orange-100 text-orange-700",
+    English: "bg-rose-100 text-rose-700",
     "Computer Science": "bg-teal-100 text-teal-700",
   };
   return (
@@ -254,28 +185,28 @@ const CourseFormModal = ({
   onClose: () => void;
   onSaved: (data: typeof EMPTY_FORM, id?: number) => void;
 }) => {
-  const [step, setStep]   = useState(0);
-  const [form, setForm]   = useState({ ...EMPTY_FORM });
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (editing) {
       setForm({
-        name:         editing.name,
-        subject:      editing.subject,
+        name: editing.name,
+        subject: editing.subject,
         teacher_name: editing.teacher_name,
-        batches:      [...editing.batches],
-        status:       editing.status,
-        fee_type:     editing.fee_type,
-        fee_amount:   editing.fee_amount,
-        discount:     editing.discount,
-        fee_due_day:  editing.fee_due_day,
-        start_date:   editing.start_date,
-        end_date:     editing.end_date,
-        class_days:   [...editing.class_days],
-        class_time:   editing.class_time,
-        description:  editing.description,
+        batches: [...editing.batches],
+        status: editing.status,
+        fee_type: editing.fee_type,
+        fee_amount: editing.fee_amount,
+        discount: editing.discount,
+        fee_due_day: editing.fee_due_day,
+        start_date: editing.start_date,
+        end_date: editing.end_date,
+        class_days: [...editing.class_days],
+        class_time: editing.class_time,
+        description: editing.description,
         max_students: editing.max_students,
       });
     } else {
@@ -296,18 +227,18 @@ const CourseFormModal = ({
   const validate = () => {
     const e: Record<string, string> = {};
     if (step === 0) {
-      if (!form.name.trim()) e.name    = "Course name is required";
-      if (!form.subject)     e.subject = "Please select a subject";
+      if (!form.name.trim()) e.name = "Course name is required";
+      if (!form.subject) e.subject = "Please select a subject";
     }
     if (step === 1) {
-      if (!form.start_date)        e.start_date = "Required";
-      if (!form.end_date)          e.end_date   = "Required";
+      if (!form.start_date) e.start_date = "Required";
+      if (!form.end_date) e.end_date = "Required";
       if (!form.class_days.length) e.class_days = "Select at least one day";
-      if (!form.class_time)        e.class_time = "Required";
+      if (!form.class_time) e.class_time = "Required";
     }
     if (step === 2) {
-      if (!form.teacher_name)   e.teacher_name = "Please select a teacher";
-      if (!form.batches.length) e.batches      = "Select at least one batch";
+      if (!form.teacher_name) e.teacher_name = "Please select a teacher";
+      if (!form.batches.length) e.batches = "Select at least one batch";
     }
     if (step === 3) {
       if (!form.fee_amount || form.fee_amount <= 0) e.fee_amount = "Enter a valid fee amount";
@@ -361,13 +292,12 @@ const CourseFormModal = ({
               <button
                 key={i}
                 onClick={() => i < step && setStep(i)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  i === step
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${i === step
                     ? "bg-white text-blue-700"
                     : i < step
-                    ? "bg-white/30 text-white cursor-pointer"
-                    : "bg-white/10 text-blue-300 cursor-default"
-                }`}
+                      ? "bg-white/30 text-white cursor-pointer"
+                      : "bg-white/10 text-blue-300 cursor-default"
+                  }`}
               >
                 {i < step ? "✓" : i + 1}. {s.split(" ")[0]}
               </button>
@@ -386,9 +316,8 @@ const CourseFormModal = ({
                   Course Name <span className="text-red-500">*</span>
                 </label>
                 <input
-                  className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? "border-red-400 bg-red-50" : "border-gray-300"
-                  }`}
+                  className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? "border-red-400 bg-red-50" : "border-gray-300"
+                    }`}
                   placeholder="e.g. Physics Foundation"
                   value={form.name}
                   onChange={(e) => setField("name", e.target.value)}
@@ -402,9 +331,8 @@ const CourseFormModal = ({
                     Subject <span className="text-red-500">*</span>
                   </label>
                   <select
-                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
-                      errors.subject ? "border-red-400" : "border-gray-300"
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${errors.subject ? "border-red-400" : "border-gray-300"
+                      }`}
                     value={form.subject}
                     onChange={(e) => setField("subject", e.target.value)}
                   >
@@ -421,13 +349,12 @@ const CourseFormModal = ({
                         key={s}
                         type="button"
                         onClick={() => setField("status", s)}
-                        className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition ${
-                          form.status === s
+                        className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition ${form.status === s
                             ? s === "Active"
                               ? "bg-green-500 text-white border-green-500"
                               : "bg-gray-600 text-white border-gray-600"
                             : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         {s}
                       </button>
@@ -459,9 +386,8 @@ const CourseFormModal = ({
                   </label>
                   <input
                     type="date"
-                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.start_date ? "border-red-400" : "border-gray-300"
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.start_date ? "border-red-400" : "border-gray-300"
+                      }`}
                     value={form.start_date}
                     onChange={(e) => setField("start_date", e.target.value)}
                   />
@@ -473,9 +399,8 @@ const CourseFormModal = ({
                   </label>
                   <input
                     type="date"
-                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.end_date ? "border-red-400" : "border-gray-300"
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.end_date ? "border-red-400" : "border-gray-300"
+                      }`}
                     value={form.end_date}
                     onChange={(e) => setField("end_date", e.target.value)}
                   />
@@ -499,11 +424,10 @@ const CourseFormModal = ({
                       key={d}
                       type="button"
                       onClick={() => toggleArray("class_days", form.class_days, d)}
-                      className={`px-3 py-2 rounded-lg text-xs font-semibold border transition ${
-                        form.class_days.includes(d)
+                      className={`px-3 py-2 rounded-lg text-xs font-semibold border transition ${form.class_days.includes(d)
                           ? "bg-blue-600 text-white border-blue-600"
                           : "border-gray-300 text-gray-600 hover:border-blue-400"
-                      }`}
+                        }`}
                     >
                       {d}
                     </button>
@@ -519,9 +443,8 @@ const CourseFormModal = ({
                   </label>
                   <input
                     type="time"
-                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.class_time ? "border-red-400" : "border-gray-300"
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.class_time ? "border-red-400" : "border-gray-300"
+                      }`}
                     value={form.class_time}
                     onChange={(e) => setField("class_time", e.target.value)}
                   />
@@ -554,11 +477,10 @@ const CourseFormModal = ({
                       key={t}
                       type="button"
                       onClick={() => setField("teacher_name", t)}
-                      className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition ${
-                        form.teacher_name === t
+                      className={`px-4 py-3 rounded-lg border text-sm font-medium text-left transition ${form.teacher_name === t
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-gray-300 text-gray-700 hover:border-blue-300 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       {form.teacher_name === t && <span className="mr-1.5">✓</span>}
                       {t}
@@ -578,11 +500,10 @@ const CourseFormModal = ({
                       key={b}
                       type="button"
                       onClick={() => toggleArray("batches", form.batches, b)}
-                      className={`py-3 rounded-lg border text-sm font-medium transition ${
-                        form.batches.includes(b)
+                      className={`py-3 rounded-lg border text-sm font-medium transition ${form.batches.includes(b)
                           ? "bg-blue-600 border-blue-600 text-white"
                           : "border-gray-300 text-gray-600 hover:border-blue-300"
-                      }`}
+                        }`}
                     >
                       {b}
                     </button>
@@ -604,11 +525,10 @@ const CourseFormModal = ({
                       key={ft}
                       type="button"
                       onClick={() => setField("fee_type", ft)}
-                      className={`flex-1 py-3 rounded-lg border text-sm font-medium transition ${
-                        form.fee_type === ft
+                      className={`flex-1 py-3 rounded-lg border text-sm font-medium transition ${form.fee_type === ft
                           ? "bg-blue-600 border-blue-600 text-white"
                           : "border-gray-300 text-gray-600 hover:border-blue-400"
-                      }`}
+                        }`}
                     >
                       {ft === "Monthly" ? "Monthly Payment" : "Full Course (One-time)"}
                     </button>
@@ -626,9 +546,8 @@ const CourseFormModal = ({
                     <input
                       type="number"
                       min={0}
-                      className={`w-full border rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.fee_amount ? "border-red-400" : "border-gray-300"
-                      }`}
+                      className={`w-full border rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.fee_amount ? "border-red-400" : "border-gray-300"
+                        }`}
                       value={form.fee_amount || ""}
                       onChange={(e) => setField("fee_amount", Number(e.target.value))}
                     />
@@ -690,14 +609,14 @@ const CourseFormModal = ({
               </div>
               <div className="divide-y divide-gray-100">
                 {[
-                  ["Course",   form.name || "—"],
-                  ["Subject",  form.subject || "—"],
-                  ["Teacher",  form.teacher_name || "—"],
-                  ["Batches",  form.batches.join(", ") || "—"],
+                  ["Course", form.name || "—"],
+                  ["Subject", form.subject || "—"],
+                  ["Teacher", form.teacher_name || "—"],
+                  ["Batches", form.batches.join(", ") || "—"],
                   ["Schedule", form.class_days.length ? `${form.class_days.join(", ")} at ${form.class_time}` : "—"],
-                  ["Fee",      form.fee_amount ? `₹${fee.toLocaleString()} / ${form.fee_type}` : "—"],
+                  ["Fee", form.fee_amount ? `₹${fee.toLocaleString()} / ${form.fee_type}` : "—"],
                   ["Duration", form.start_date && form.end_date ? `${form.start_date} → ${form.end_date}` : "—"],
-                  ["Status",   form.status],
+                  ["Status", form.status],
                 ].map(([k, v]) => (
                   <div key={k} className="flex items-center px-4 py-3 gap-3">
                     <span className="text-xs text-gray-400 font-semibold w-20 flex-shrink-0">{k}</span>
@@ -723,9 +642,8 @@ const CourseFormModal = ({
             {STEPS.map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === step ? "w-5 bg-blue-600" : i < step ? "w-3 bg-green-500" : "w-3 bg-gray-300"
-                }`}
+                className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-blue-600" : i < step ? "w-3 bg-green-500" : "w-3 bg-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -763,8 +681,8 @@ const CourseDetail = ({
   onEdit: (c: Course) => void;
   onDelete: (c: Course) => void;
 }) => {
-  const pct   = Math.min(100, Math.round((course.students / course.max_students) * 100));
-  const fee   = finalFee(course.fee_amount, course.discount);
+  const pct = Math.min(100, Math.round((course.students / course.max_students) * 100));
+  const fee = finalFee(course.fee_amount, course.discount);
   const weeks = weeksBetween(course.start_date, course.end_date);
 
   return (
@@ -792,8 +710,8 @@ const CourseDetail = ({
       {/* Quick stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <StatCard title="Students Enrolled" value={`${course.students}/${course.max_students}`} />
-        <StatCard title="Fee Amount"        value={`₹${fee.toLocaleString()}`} />
-        <StatCard title="Duration"          value={`${weeks} weeks`} />
+        <StatCard title="Fee Amount" value={`₹${fee.toLocaleString()}`} />
+        <StatCard title="Duration" value={`${weeks} weeks`} />
       </div>
 
       {/* Content */}
@@ -825,11 +743,10 @@ const CourseDetail = ({
                   {DAYS.map((d) => (
                     <span
                       key={d}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border ${
-                        course.class_days.includes(d)
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold border ${course.class_days.includes(d)
                           ? "bg-blue-600 text-white border-blue-600"
                           : "bg-gray-50 text-gray-300 border-gray-200"
-                      }`}
+                        }`}
                     >
                       {d}
                     </span>
@@ -916,16 +833,74 @@ const CourseDetail = ({
 // ─── Main Courses Component ───────────────────────────────────────────────────
 
 const Courses = () => {
-  const [courses,      setCourses]      = useState<Course[]>(MOCK_COURSES);
-  const [search,       setSearch]       = useState("");
+  const [search, setSearch] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
-  const [batchFilter,  setBatchFilter]  = useState("");
+  const [batchFilter, setBatchFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [modalOpen,    setModalOpen]    = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
   const [detailCourse, setDetailCourse] = useState<Course | null>(null);
-  const [toast,        setToast]        = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [, setLoading] = useState(false);
+  
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const data = await getCourses();
+      setCourses(data);
+    } catch (err) {
+      showToast("Failed to load courses", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ SAVE (Create / Update)
+const handleSaved = async (data: typeof EMPTY_FORM, id?: number) => {
+  try {
+    if (id) {
+      await updateCourse(id, data);
+      showToast("Course updated successfully");
+    } else {
+      await createCourse(data);
+      showToast("Course created successfully");
+    }
+    fetchCourses();
+  } catch {
+    showToast("Failed to save course", "error");
+  }
+};
+
+// ✅ DELETE
+const handleDelete = async (id: number) => {
+  try {
+    await deleteCourse(id);
+    showToast("Course deleted successfully");
+    setDeleteTarget(null);
+    fetchCourses();
+  } catch {
+    showToast("Failed to delete course", "error");
+  }
+};
+
+// ✅ STATUS TOGGLE
+const handleToggleStatus = async (course: Course) => {
+  try {
+    const newStatus = course.status === "Active" ? "Inactive" : "Active";
+    await updateCourseStatus(course.id, newStatus);
+    showToast("Status updated");
+    fetchCourses();
+  } catch {
+    showToast("Failed to update status", "error");
+  }
+};
 
   const showToast = (message: string, type: "success" | "error" = "success") =>
     setToast({ message, type });
@@ -934,49 +909,18 @@ const Courses = () => {
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => (
       (course.name.toLowerCase().includes(search.toLowerCase()) ||
-       course.course_id.toLowerCase().includes(search.toLowerCase()) ||
-       course.teacher_name.toLowerCase().includes(search.toLowerCase())) &&
+        course.course_id.toLowerCase().includes(search.toLowerCase()) ||
+        course.teacher_name.toLowerCase().includes(search.toLowerCase())) &&
       (subjectFilter ? course.subject === subjectFilter : true) &&
-      (batchFilter   ? course.batches.includes(batchFilter) : true) &&
-      (statusFilter  ? course.status === statusFilter : true)
+      (batchFilter ? course.batches.includes(batchFilter) : true) &&
+      (statusFilter ? course.status === statusFilter : true)
     ));
   }, [courses, search, subjectFilter, batchFilter, statusFilter]);
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-  const handleDelete = (id: number) => {
-    setCourses((prev) => prev.filter((c) => c.id !== id));
-    setDeleteTarget(null);
-    showToast("Course deleted");
-  };
 
-  const handleToggleStatus = (course: Course) => {
-    const newStatus = course.status === "Active" ? "Inactive" : "Active";
-    setCourses((prev) =>
-      prev.map((c) => (c.id === course.id ? { ...c, status: newStatus } : c))
-    );
-    showToast(`Marked as ${newStatus}`);
-  };
+ 
 
-  const handleSaved = (data: typeof EMPTY_FORM, id?: number) => {
-    if (id) {
-      // Edit
-      setCourses((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ...data } : c))
-      );
-      showToast("Course updated successfully");
-    } else {
-      // Create
-      const newId = nextId(courses);
-      const newCourse: Course = {
-        ...data,
-        id:        newId,
-        course_id: `CRS-${String(newId).padStart(3, "0")}`,
-        students:  0,
-      };
-      setCourses((prev) => [...prev, newCourse]);
-      showToast("Course added successfully");
-    }
-  };
+ 
 
   // ── Detail view ───────────────────────────────────────────────────────────
   if (detailCourse) {
@@ -1029,10 +973,10 @@ const Courses = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-        <StatCard title="Total Courses"    value={courses.length} />
-        <StatCard title="Active Courses"   value={courses.filter((c) => c.status === "Active").length} />
+        <StatCard title="Total Courses" value={courses.length} />
+        <StatCard title="Active Courses" value={courses.filter((c) => c.status === "Active").length} />
         <StatCard title="Subjects Offered" value={new Set(courses.map((c) => c.subject)).size} />
-        <StatCard title="Total Enrolled"   value={courses.reduce((a, c) => a + c.students, 0)} />
+        <StatCard title="Total Enrolled" value={courses.reduce((a, c) => a + c.students, 0)} />
       </div>
 
       {/* Filters */}
@@ -1124,13 +1068,12 @@ const Courses = () => {
                       <span className="font-semibold text-gray-800">{course.students}</span>
                       <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${
-                            course.students / course.max_students > 0.9
+                          className={`h-full rounded-full ${course.students / course.max_students > 0.9
                               ? "bg-red-500"
                               : course.students / course.max_students > 0.7
-                              ? "bg-yellow-400"
-                              : "bg-blue-500"
-                          }`}
+                                ? "bg-yellow-400"
+                                : "bg-blue-500"
+                            }`}
                           style={{ width: `${Math.min(100, (course.students / course.max_students) * 100)}%` }}
                         />
                       </div>
@@ -1148,11 +1091,10 @@ const Courses = () => {
 
                   <td className="p-4">
                     <button onClick={() => handleToggleStatus(course)}>
-                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${
-                        course.status === "Active"
+                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${course.status === "Active"
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-500"
-                      }`}>
+                        }`}>
                         {course.status}
                       </span>
                     </button>
