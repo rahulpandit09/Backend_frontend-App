@@ -1,25 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-
-# Routers
 from app.routers import auth, course, student, admin
-
 
 from app.routers.Student import RegistrationForm
 from app.routers.studentAdmin import addStudent
 from app.routers.studentAdmin import admin_dashboard
 from app.routers.studentAdmin import adminDashboard_router
-
-# ✅ Import ALL models so SQLAlchemy registers them
 from app.models import user, course as course_model, lecture, enrollment, test, result
-
-# 🔥 VERY IMPORTANT — ADD THESE TWO LINES
 from app.models.admin.addStudent import AdminStudent
 from app.models.admin.fee import Fee
 from app.routers.studentAdmin import admin_notification
 from app.routers.Teacher import faculty_router
 from app.routers.Courses.course import router as course_router
+from app.routers.Batchs import batch
 
 
 
@@ -28,9 +22,8 @@ app = FastAPI(
     title="Coaching Portal API",
     openapi_version="3.0.3"
 )
-# =========================
+
 # CORS
-# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -75,6 +68,7 @@ app.include_router(admin_notification.router)
 app.include_router(adminDashboard_router.router)
 app.include_router(faculty_router.router)
 app.include_router(course_router)  
+app.include_router(batch.router)
 
 
 

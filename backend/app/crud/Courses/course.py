@@ -15,7 +15,7 @@ def _generate_course_id(db: Session) -> str:
     return f"CRS-{str(next_num).zfill(3)}"
 
 
-# ─── READ ─────────────────────────────────────────────────────────────────────
+# ─── READ ───────────────
 
 def get_all_courses(
     db:      Session,

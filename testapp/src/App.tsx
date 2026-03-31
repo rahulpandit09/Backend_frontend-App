@@ -41,6 +41,7 @@ import AddStudent from "./components/Dashboard/pages/admin/AddStudent";
 import ManageStudents from "./components/Dashboard/pages/admin/AdminManageStudents";
 import ViewStudent from "./components/Dashboard/pages/admin/viewStudent";
 import Courses from "./components/Dashboard/pages/admin/Courses/Courses";
+import Batches from "./components/Dashboard/pages/admin/Batch/Batches ";
 
 
 const App = () => {
@@ -93,6 +94,7 @@ const App = () => {
         <Route path="teachers/assign" element={<AssignTeacher />} />
         <Route path="teachers/:id" element={<TeacherProfile />} />
         <Route path="courses" element={<Courses/>} />
+        <Route path="/admin/batches" element={<Batches />} />
       </Route>
 
       {/* ================= TEACHER ROUTES ================= */}
